@@ -46,7 +46,7 @@ async def predict(file: UploadFile = File(...)):
 
     buf = io.BytesIO()
     pil_img.save(buf, format="JPEG")
-    img_b64 = base64.b64encode(buf.getvalue()).decode()
+    img_b64 = base64.b64encode(buf.getvalue()).decode()  # ← no prefix here
 
     detections = []
     for box in result.boxes:
@@ -58,12 +58,12 @@ async def predict(file: UploadFile = File(...)):
         })
 
     return JSONResponse({
-        "image": f"data:image/jpeg;base64,{img_b64}",
+        "image": img_b64,          # ← removed data:image/jpeg;base64, prefix
         "detections": detections,
         "count": len(detections)
     })
 
-# ← Serve React frontend (must be LAST, after all routes)
+# Serve React frontend (must be LAST, after all routes)
 STATIC = pathlib.Path(__file__).parent.parent / "static"
 if STATIC.exists():
     app.mount("/", StaticFiles(directory=STATIC, html=True), name="static")
